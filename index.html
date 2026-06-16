@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AMCA Safety Hub — Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* AMCA brand — primary blue is a single swap point. Replace --brand with the exact hex
+     from the official AMCA Corporate Logo pack to make this pixel-accurate. */
+  --brand:#0A5BA8; --brand-deep:#06335F; --brand-soft:#E6F0F9;
+  --ink:#0E2236; --slate:#566472; --faint:#8893A0; --line:#E2E8EE; --mist:#F4F7FA; --paper:#FFFFFF;
+  --orange:var(--brand); --orange-deep:var(--brand-deep); --orange-soft:var(--brand-soft);
+  --teal:#0E6E56; --teal-soft:#E2F3ED;
+  --purple:#5747C0; --purple-soft:#EFEDFB;
+  --blue:#0A5BA8; --blue-soft:#E6F0F9;
+  --green:#3B6D11; --green-soft:#EDF5E2;
+  --red:#A32D2D; --red-soft:#FCEBEB;
+  --amber:#7A5106; --amber-soft:#FAF0DC;
+  --swms:#B45309; --swms-deep:#8A3D06; --swms-soft:#FBEDDC;
+  --grayt:#4A5560; --gray-soft:#EEF1F4;
+  --display:'Plus Jakarta Sans',sans-serif; --body:'Inter',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+body{font-family:var(--body);color:var(--ink);background:var(--paper);font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--orange);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1020px;margin:0 auto;padding:0 24px}
+/* ---------- header ---------- */
+header{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(6px);z-index:50;border-bottom:1px solid var(--line)}
+.hbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0}
+.brand{display:flex;align-items:center;gap:11px;cursor:pointer;background:none;border:none;text-align:left}
+.brand .mark{width:34px;height:34px;border-radius:9px;background:var(--orange);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.brand .mark svg{width:19px;height:19px;stroke:#fff}
+.brand .bt{font-family:var(--display);font-weight:700;font-size:16.5px;letter-spacing:-.01em;line-height:1.15}
+.brand .bs{font-size:11.5px;color:var(--faint);font-weight:500}
+.hsearch{flex:1;max-width:430px;display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:10px;padding:9px 13px;background:var(--mist);color:var(--faint);font-size:13.5px;transition:border-color .15s}
+.hsearch:hover{border-color:#c9cecb}
+.hsearch kbd{margin-left:auto;font-family:var(--body);font-size:11px;border:1px solid var(--line);background:#fff;border-radius:5px;padding:1px 6px;color:var(--faint)}
+.member{font-size:12px;color:var(--slate);background:var(--mist);border:1px solid var(--line);border-radius:99px;padding:5px 12px;white-space:nowrap;font-weight:500}
+.tape{height:5px;background:repeating-linear-gradient(135deg,var(--orange) 0 14px,var(--ink) 14px 28px)}
+/* ---------- shared ---------- */
+.crumbs{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--faint);padding:22px 0 0;flex-wrap:wrap}
+.crumbs a{color:var(--slate);font-weight:500}
+.crumbs a:hover{color:var(--orange)}
+.crumbs .sep{color:#c5cac7}
+.context{display:flex;gap:10px;align-items:flex-start;background:var(--mist);border:1px solid var(--line);border-radius:12px;padding:13px 16px;margin:18px 0 26px;font-size:13.5px;color:var(--slate);line-height:1.6}
+.context svg{width:17px;height:17px;flex-shrink:0;margin-top:2px;stroke:var(--orange)}
+.badge{display:inline-flex;align-items:center;font-size:11px;font-weight:600;letter-spacing:.04em;border-radius:6px;padding:3px 8px;line-height:1.3}
+.b-swi{background:var(--teal-soft);color:var(--teal)} .b-swms{background:var(--swms-soft);color:var(--swms-deep)}
+.b-form{background:var(--purple-soft);color:var(--purple)} .b-policy{background:var(--blue-soft);color:var(--blue)}
+.b-procedure,.b-iso,.b-role,.b-intro,.b-register{background:var(--gray-soft);color:var(--grayt)}
+.meta{font-size:12px;color:var(--faint)}
+h1{font-family:var(--display);font-weight:700;letter-spacing:-.015em;font-size:27px;line-height:1.2}
+h2{font-family:var(--display);font-weight:600;letter-spacing:-.01em;font-size:18px}
+.sub{color:var(--slate);font-size:14.5px;margin-top:6px;max-width:640px}
+.grid{display:grid;gap:14px}
+.card{border:1px solid var(--line);border-radius:14px;padding:18px;background:#fff;transition:border-color .15s,transform .15s;display:block}
+a.card:hover,button.card:hover{border-color:#c4c9c6;transform:translateY(-1px)}
+.doc-card{display:flex;flex-direction:column;gap:8px}
+.doc-card .t{font-weight:600;font-size:14.5px;line-height:1.4}
+.doc-card .p{font-size:12.8px;color:var(--slate);line-height:1.55}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:#fff;border-radius:9px;padding:8px 14px;font-size:13px;font-weight:500;color:var(--ink);transition:background .15s}
+.btn:hover{background:var(--mist)}
+.btn.primary{background:var(--orange);border-color:var(--orange);color:#fff}
+.btn.primary:hover{background:#d04f0a}
+.btn svg{width:15px;height:15px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:99px;padding:6px 14px;font-size:12.5px;font-weight:500;color:var(--slate);transition:all .15s}
+.chip:hover{border-color:var(--orange);color:var(--orange)}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.note{font-size:12px;color:var(--faint);margin-top:14px}
+footer{border-top:1px solid var(--line);margin-top:70px;padding:26px 0 40px;font-size:12px;color:var(--faint);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+/* ---------- home ---------- */
+.hero{padding:52px 0 8px;text-align:center}
+.hero .eyebrow{font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--orange)}
+.hero h1{font-size:34px;margin:10px 0 8px}
+.hero p{color:var(--slate);max-width:520px;margin:0 auto;font-size:15px}
+.bigsearch{max-width:560px;margin:26px auto 0;display:flex;align-items:center;gap:11px;border:1.5px solid var(--line);border-radius:14px;padding:15px 18px;background:#fff;color:var(--faint);font-size:15px;text-align:left;transition:border-color .15s;width:100%}
+.bigsearch:hover{border-color:var(--orange)}
+.bigsearch svg{width:19px;height:19px;stroke:var(--faint);flex-shrink:0}
+.trychips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.paths{grid-template-columns:repeat(auto-fit,minmax(250px,1fr));margin-top:44px}
+.path-card{text-align:left;display:flex;flex-direction:column;gap:10px;padding:22px;border-radius:16px}
+.path-card .ic{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center}
+.path-card .ic svg{width:21px;height:21px}
+.path-card h2{font-size:17px}
+.path-card .d{font-size:13.5px;color:var(--slate);line-height:1.6}
+.path-card .go{margin-top:auto;font-size:13px;font-weight:600;color:var(--orange);display:flex;align-items:center;gap:5px;padding-top:6px}
+.sec-dir{margin-top:54px}
+.dir-grid{grid-template-columns:repeat(auto-fit,minmax(290px,1fr));margin-top:16px}
+.dir-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:11px;font-size:13px;transition:border-color .15s}
+.dir-item:hover{border-color:#c4c9c6}
+.dir-item .num{font-family:var(--display);font-weight:700;font-size:12px;color:var(--faint);width:24px;flex-shrink:0}
+.dir-item .arrow{margin-left:auto;color:var(--faint);font-size:12px;white-space:nowrap}
+.most{margin-top:54px}
+/* ---------- library / index ---------- */
+.libhead{padding:8px 0 0}
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(225px,1fr));gap:10px;margin:22px 0 8px}
+.leg{border:1px solid var(--line);border-radius:12px;padding:13px 15px}
+.leg .lt{font-size:13px;font-weight:600;font-family:var(--display);margin:7px 0 3px}
+.leg .ld{font-size:12.3px;color:var(--slate);line-height:1.5}
+.idx{margin-top:14px;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+details.sec{border-bottom:1px solid var(--line)}
+details.sec:last-child{border-bottom:none}
+details.sec summary{list-style:none;display:flex;align-items:center;gap:15px;padding:16px 18px;cursor:pointer;transition:background .12s}
+details.sec summary::-webkit-details-marker{display:none}
+details.sec summary:hover{background:var(--mist)}
+.sec .snum{font-family:var(--display);font-weight:700;font-size:13px;color:var(--orange-deep);background:var(--orange-soft);border-radius:8px;width:38px;height:30px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sec .sname{display:block;font-family:var(--display);font-weight:600;font-size:15px;line-height:1.25}
+.sec .swhat{display:block;font-size:12.5px;color:var(--slate);margin-top:3px;line-height:1.45;max-width:560px}
+.sec .smeta{margin-left:auto;display:flex;align-items:center;gap:12px;flex-shrink:0;padding-left:10px}
+.sec .scount{font-size:12px;color:var(--faint);white-space:nowrap}
+.sec .chev{color:var(--faint);transition:transform .18s;flex-shrink:0}
+details.sec[open]>summary .chev{transform:rotate(180deg)}
+details.sec[open]>summary{background:var(--mist)}
+.seclist{padding:4px 18px 16px 71px;display:flex;flex-direction:column}
+.cmp{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--line);text-align:left;background:none;border-left:none;border-right:none;border-top:none;width:100%;transition:opacity .12s}
+.cmp:last-child{border-bottom:none}
+.cmp:hover .cmp-t{color:var(--orange)}
+.cmp .cmp-code{font-size:11.5px;font-weight:600;color:var(--faint);font-family:var(--display);width:62px;flex-shrink:0}
+.cmp .cmp-t{font-size:13.3px;font-weight:500;transition:color .12s}
+.cmp .cmp-open{margin-left:auto;font-size:12px;color:var(--blue);white-space:nowrap}
+.sechint{font-size:12px;color:var(--faint);padding:2px 0 8px}
+.libhome{display:flex;gap:14px;align-items:center;background:linear-gradient(100deg,var(--brand-soft),var(--mist));border:1px solid var(--line);border-radius:16px;padding:18px 20px;margin-top:18px;width:100%;text-align:left}
+.libhome .lh-ic{width:42px;height:42px;border-radius:12px;background:var(--brand-deep);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.libhome .lh-ic svg{width:21px;height:21px;stroke:#fff}
+.libhome h2{font-size:16.5px}
+.libhome .d{display:block;font-size:13px;color:var(--slate);margin-top:3px;max-width:600px}
+.libhome .go{margin-left:auto;font-size:13px;font-weight:600;color:var(--orange-deep);white-space:nowrap;display:flex;align-items:center;gap:5px}
+@media(max-width:600px){.libhome .go{display:none}.seclist{padding-left:18px}}
+.navlink{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--slate);border:1px solid var(--line);border-radius:9px;padding:8px 13px;background:#fff;white-space:nowrap}
+.navlink:hover{border-color:var(--orange);color:var(--orange)}
+.navlink svg{width:15px;height:15px}
+/* ---------- doc page ---------- */
+.docpage{max-width:760px;margin:0 auto}
+.dochead{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-top:20px}
+.docbody{margin-top:22px}
+.panel{background:var(--mist);border:1px solid var(--line);border-radius:13px;padding:16px 18px;margin:18px 0}
+.panel h3{font-size:13.5px;font-weight:600;margin-bottom:10px;font-family:var(--display)}
+.reqs{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:9px;font-size:13px;color:var(--slate)}
+.reqs div{display:flex;gap:8px;align-items:flex-start}
+.reqs svg{width:15px;height:15px;stroke:var(--teal);flex-shrink:0;margin-top:3px}
+.dodont{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}
+@media(max-width:560px){.dodont{grid-template-columns:1fr}}
+.dd{border-radius:13px;padding:14px 16px;font-size:13px;line-height:1.6}
+.dd h3{font-size:13px;font-weight:600;margin-bottom:6px;display:flex;gap:6px;align-items:center;font-family:var(--display)}
+.dd ul{padding-left:17px}
+.dd-do{background:var(--green-soft);color:var(--green)} .dd-do h3{color:#27500A}
+.dd-dont{background:var(--red-soft);color:var(--red)} .dd-dont h3{color:#791F1F}
+.steps{margin:10px 0}
+.step{display:flex;gap:14px;padding:13px 0;border-bottom:1px solid var(--line)}
+.step:last-child{border-bottom:none}
+.step .n{width:27px;height:27px;border-radius:50%;background:var(--teal-soft);color:var(--teal);font-size:12.5px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--display)}
+.step .t{font-weight:600;font-size:14px}
+.step .d{font-size:13.2px;color:var(--slate);margin-top:3px}
+.warn{background:var(--amber-soft);border-radius:13px;padding:13px 16px;font-size:13px;color:var(--amber);line-height:1.6;margin:18px 0}
+.docfoot{display:flex;justify-content:space-between;align-items:center;gap:10px;border-top:1px solid var(--line);margin-top:26px;padding-top:16px;flex-wrap:wrap}
+.pn{font-size:12.5px;font-weight:500;color:var(--blue)}
+.statement{font-family:var(--display);font-size:18px;font-weight:500;line-height:1.55;border-left:3px solid var(--orange);padding:4px 0 4px 18px;margin:20px 0;color:var(--ink)}
+.resp-row{display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--line);font-size:13.2px}
+.resp-row:last-child{border:none}
+.resp-row .r{font-weight:600;width:150px;flex-shrink:0}
+.resp-row .d{color:var(--slate)}
+.field{margin-bottom:13px}
+.field label{display:block;font-size:12.5px;font-weight:600;margin-bottom:5px}
+.field input,.field textarea,.field select{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 12px;font-family:var(--body);font-size:13.5px;background:var(--mist);color:var(--faint)}
+.hz{border:1px solid var(--line);border-radius:13px;padding:15px 17px;margin-bottom:12px}
+.hz .hzt{font-weight:600;font-size:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.risk{font-size:10.5px;font-weight:700;letter-spacing:.05em;border-radius:5px;padding:2px 7px}
+.risk.high{background:var(--red-soft);color:var(--red)} .risk.med{background:var(--amber-soft);color:var(--amber)}
+.hz ul{padding-left:18px;font-size:13px;color:var(--slate);margin-top:8px;line-height:1.7}
+details.pstep{border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden}
+details.pstep summary{list-style:none;display:flex;gap:13px;align-items:center;padding:13px 16px;cursor:pointer;font-weight:600;font-size:14px}
+details.pstep summary::-webkit-details-marker{display:none}
+details.pstep .n{width:25px;height:25px;border-radius:50%;background:var(--gray-soft);color:var(--grayt);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--display)}
+details.pstep[open] summary{border-bottom:1px solid var(--line)}
+details.pstep .d{padding:13px 16px 15px 54px;font-size:13.2px;color:var(--slate)}
+details.pstep summary .chev{margin-left:auto;color:var(--faint);transition:transform .15s}
+details.pstep[open] summary .chev{transform:rotate(180deg)}
+table.reg{width:100%;border-collapse:collapse;font-size:13px;margin-top:14px}
+table.reg th{text-align:left;font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line)}
+table.reg td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--slate)}
+table.reg td:first-child{white-space:nowrap;color:var(--ink);font-weight:500}
+/* ---------- search overlay ---------- */
+.ovl{position:fixed;inset:0;background:rgba(20,22,21,.42);z-index:90;display:none;align-items:flex-start;justify-content:center;padding:9vh 18px 18px}
+.ovl.open{display:flex}
+.sbox{background:#fff;border-radius:16px;width:100%;max-width:600px;overflow:hidden;border:1px solid var(--line);box-shadow:0 18px 50px rgba(0,0,0,.18)}
+.sbox .sin{display:flex;align-items:center;gap:11px;padding:16px 18px;border-bottom:1px solid var(--line)}
+.sbox input{flex:1;border:none;outline:none;font-size:15.5px;font-family:var(--body);color:var(--ink)}
+.sbox .sres{max-height:54vh;overflow:auto;padding:8px}
+.sr-item{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;background:none;border:none;border-radius:11px;padding:11px 12px;transition:background .12s}
+.sr-item:hover{background:var(--mist)}
+.sr-item .ti{font-weight:600;font-size:13.8px}
+.sr-item .pi{font-size:12.3px;color:var(--slate);margin-top:2px}
+.sr-empty{padding:26px;text-align:center;color:var(--faint);font-size:13.5px}
+.shint{padding:10px 18px;border-top:1px solid var(--line);font-size:11.5px;color:var(--faint);display:flex;gap:14px}
+/* ---------- assistant ---------- */
+.fab{position:fixed;right:22px;bottom:22px;z-index:80;display:flex;align-items:center;gap:8px;background:var(--ink);color:#fff;border:none;border-radius:99px;padding:12px 18px;font-size:13.5px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.22)}
+.fab svg{width:17px;height:17px}
+.drawer{position:fixed;right:22px;bottom:22px;z-index:85;width:min(380px,calc(100vw - 44px));background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.2);display:none;flex-direction:column;overflow:hidden}
+.drawer.open{display:flex}
+.dhead{display:flex;align-items:center;gap:9px;padding:14px 16px;border-bottom:1px solid var(--line);font-weight:600;font-size:14px;font-family:var(--display)}
+.dhead svg{width:16px;height:16px;stroke:var(--orange)}
+.dhead button{margin-left:auto;background:none;border:none;color:var(--faint);font-size:17px;line-height:1}
+.dbody{padding:14px 16px;max-height:46vh;overflow:auto;display:flex;flex-direction:column;gap:10px}
+.msg-u{align-self:flex-end;background:var(--mist);border-radius:12px;padding:9px 13px;font-size:13px;max-width:85%}
+.msg-a{font-size:13px;line-height:1.6;max-width:95%}
+.msg-a .mini{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-top:7px;width:100%;background:#fff;text-align:left;transition:border-color .15s}
+.msg-a .mini:hover{border-color:var(--orange)}
+.msg-a .mini .mt{font-weight:600;font-size:12.8px;margin-top:3px}
+.msg-a .mini .open{font-size:12px;color:var(--blue);font-weight:500;white-space:nowrap}
+.dinput{display:flex;gap:9px;padding:12px 14px;border-top:1px solid var(--line)}
+.dinput input{flex:1;border:1px solid var(--line);border-radius:99px;padding:9px 14px;font-size:13px;font-family:var(--body);outline:none}
+.dinput input:focus{border-color:var(--orange)}
+.dinput button{background:var(--orange);border:none;border-radius:99px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.dinput button svg{width:15px;height:15px;stroke:#fff}
+@media(max-width:640px){.hsearch{display:none}.hero h1{font-size:27px}.member{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap hbar">
+    <button class="brand" onclick="go('home')" aria-label="AMCA Safety Hub home">
+      <span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v5c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg></span>
+      <span><span class="bt">AMCA Safety Hub</span><br><span class="bs">WHS &amp; IMS manual</span></span>
+    </button>
+    <button class="hsearch" id="hsearch" onclick="openSearch()" aria-label="Search the manual">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      Search the whole manual… <kbd>/</kbd>
+    </button>
+    <button class="navlink" onclick="go('index')" aria-label="Browse the full index of the manual"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Full index</button>
+    <span class="member">Acme Mechanical Pty Ltd · Member</span>
+  </div>
+  <div class="tape" aria-hidden="true"></div>
+</header>
+<main id="app" class="wrap"></main>
+<div class="ovl" id="ovl" role="dialog" aria-label="Search">
+  <div class="sbox">
+    <div class="sin">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#8A918D" stroke-width="2" width="18" height="18" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="sq" placeholder="Try 'heights', 'incident report' or 'toolbox talk'…" autocomplete="off">
+      <button class="chip" onclick="closeSearch()" style="padding:4px 10px">Esc</button>
+    </div>
+    <div class="sres" id="sres"></div>
+    <div class="shint"><span>Searches titles, codes, tags and purpose</span><span style="margin-left:auto">Enter ↵ to open first result</span></div>
+  </div>
+</div>
+<button class="fab" id="fab" onclick="toggleAssist(true)">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-9 8.4 8.5 8.5 0 01-3.4-.7L3 21l1.8-5.6A8.38 8.38 0 013 11.5a8.5 8.5 0 018.5-8.5 8.38 8.38 0 019.5 8.5z"/></svg>
+  Ask the Safety Assistant
+</button>
+<div class="drawer" id="drawer" role="dialog" aria-label="Safety Assistant">
+  <div class="dhead">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-9 8.4 8.5 8.5 0 01-3.4-.7L3 21l1.8-5.6A8.38 8.38 0 013 11.5a8.5 8.5 0 018.5-8.5 8.38 8.38 0 019.5 8.5z"/></svg>
+    Safety Assistant
+    <button onclick="toggleAssist(false)" aria-label="Close assistant">×</button>
+  </div>
+  <div class="dbody" id="dbody">
+    <div class="msg-a">G'day — I can find any page in the manual for you. Ask in your own words, like <em>"what paperwork before roof work?"</em> I'll point you to the right documents, and the documents themselves are always the source of truth.</div>
+  </div>
+  <div class="dinput">
+    <input id="dq" placeholder="Ask anything…" onkeydown="if(event.key==='Enter')askAssist()">
+    <button onclick="askAssist()" aria-label="Send"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+  </div>
+</div>
+<script>
+const TYPES={
+ swi:{label:'SWI',name:'Safe work instruction',cls:'b-swi'},
+ swms:{label:'SWMS',name:'Safe work method statement',cls:'b-swms'},
+ form:{label:'Form',name:'Form / template',cls:'b-form'},
+ policy:{label:'Policy',name:'Policy',cls:'b-policy'},
+ procedure:{label:'Procedure',name:'Safety system procedure',cls:'b-procedure'},
+ iso:{label:'ISO 45001',name:'Management system procedure',cls:'b-iso'},
+ role:{label:'Roles',name:'Roles & responsibilities',cls:'b-role'},
+ intro:{label:'Guide',name:'Introduction',cls:'b-intro'},
+ register:{label:'Register',name:'Register',cls:'b-register'},
+ plan:{label:'Plan',name:'Site safety plan',cls:'b-policy'}
+};
+const HAZARDS=['Heights','Electrical','Confined space','Hot works','Dust & fumes','Manual handling','Plant & tools'];
+const PATHS={
+ work:{title:'Do a job safely',icon:'tool',color:'orange',
+  d:'Step-by-step instructions and method statements for the work itself. Start here before any task on site.',
+  ctx:'New here? Pick the instruction that matches your task. Every one tells you what to check before you start, what to do and what never to do — readable in about 3 minutes.',
+  cols:['swi','swms']},
+ forms:{title:'Find a form or template',icon:'file',color:'purple',
+  d:'Permits, checklists, reports and registers — the paperwork side of safety, ready to use.',
+  ctx:'Every form tells you when to use it and what information you\'ll need before you start, so you grab the right one first time.',
+  cols:['forms-site','forms-office']},
+ system:{title:'Understand the system',icon:'book',color:'teal',
+  d:'Policies, who\'s responsible for what, and how the safety management system runs day to day.',
+  ctx:'This is the "why and who" of the manual. If you\'re new to AMCA documents, read the 2-minute introduction first — it explains how everything fits together.',
+  cols:['intro','policies','roles','procedures','iso','sitesafety','register']}
+};
+const COLS={
+ swi:{path:'work',title:'Safe work instructions',type:'swi',sec:'06',count:'72 instructions',
+  d:'One instruction per task — heights, electrical, cutting, lifting. Filter by hazard to find yours.',
+  ctx:'Each instruction covers a single task: what to have ready before you start, the dos and don\'ts, and the steps in order. If your task involves high-risk construction work, you\'ll also be pointed to the matching SWMS.'},
+ swms:{path:'work',title:'Safe work method statements',type:'swms',sec:'05',count:'3 work packages',
+  d:'Required for high-risk construction work. Hazards, risk levels and controls for whole work packages.',
+  ctx:'A SWMS is the legally required plan for high-risk construction work — it lists each hazard in a work package, how risky it is, and the controls that must be in place. Review it with the crew before work starts and keep it on site.'},
+ 'forms-site':{path:'forms',title:'Site forms',type:'form',sec:'07',count:'5 of 14 shown',
+  d:'Used in the field — permits, pre-starts, toolbox talks, incident reports.',
+  ctx:'These are the forms crews use on site, day to day. Each one says when it must be completed and who signs it.'},
+ 'forms-office':{path:'forms',title:'Office forms & registers',type:'form',sec:'07',count:'3 of 9 shown',
+  d:'Records the office maintains — inductions, training, document reviews.',
+  ctx:'These keep the compliance records straight. Mostly completed by supervisors and the safety manager.'},
+ intro:{path:'system',title:'Start here: how this manual works',type:'intro',sec:'01',count:'2 min read',
+  d:'A two-minute orientation for anyone new to AMCA safety documents.',ctx:''},
+ policies:{path:'system',title:'Safety policies',type:'policy',sec:'02',count:'10 policies',
+  d:'The commitments your company makes — short, signed statements of intent.',
+  ctx:'A policy is a one-page commitment signed by management. It says what the company stands for; the procedures say how it\'s done in practice.'},
+ roles:{path:'system',title:'Roles & responsibilities',type:'role',sec:'03',count:'5 of 9 shown',
+  d:'What each person — from director to apprentice — is responsible for.',
+  ctx:'Find your role to see exactly what safety duties sit with you. Useful in inductions and when responsibilities are questioned after an incident.'},
+ procedures:{path:'system',title:'Safety system procedures',type:'procedure',sec:'04',count:'8 of 33 shown',
+  d:'How the system runs: risk management, incidents, training, emergencies.',
+  ctx:'Procedures are the engine room of the system — each one describes a process from trigger to close-out, step by step. They\'re written for supervisors and the safety manager.'},
+ iso:{path:'system',title:'Management system procedures (ISO 45001)',type:'iso',sec:'08',count:'7 procedures',
+  d:'The framework documents that align the system with ISO 45001.',
+  ctx:'These map the safety system to the ISO 45001 standard — mostly used by management and auditors. Field crews rarely need them.'},
+ register:{path:'system',title:'Amendment register',type:'register',sec:'10',count:'Auto-maintained',
+  d:'Every change to every document, logged automatically when published.',ctx:''},
+ sitesafety:{path:'system',title:'Site Safety Plan',type:'plan',sec:'09',count:'Template',
+  d:'The project-level plan that ties the whole system to one specific site.',
+  ctx:'A Site Safety Plan is prepared for each project. It pulls together the policies, procedures, SWMS and instructions that apply to that site into one plan the crew works to.'}
+};
+const DOCS=[
+/* ---- SWIs ---- */
+{id:'swi-001',col:'swi',type:'swi',code:'SWI-001',title:'Ladder use and inspection',hz:['Heights'],mins:2,
+ purpose:'Safe selection, inspection and use of step and extension ladders for short-duration work.',
+ who:'All workers using ladders',
+ before:['Industrial-rated ladder (120 kg+)','Inspection tag current','Firm, level ground'],
+ do_:['Maintain three points of contact','Face the ladder at all times','Set extension ladders at 4:1'],
+ dont:['Work off the top two rungs','Carry tools in hand while climbing','Use near doorways without barricades'],
+ steps:[{t:'Inspect before use',d:'Check stiles, rungs, feet and locking mechanisms. Damaged ladder is tagged out and removed from site.'},{t:'Set up on firm ground',d:'Level base, secured top where possible. Extension ladders extend 1 m past the landing point.'},{t:'Work within reach',d:'Belt buckle stays between the stiles. Reposition rather than over-reach.'}]},
+{id:'swi-003',col:'swi',type:'swi',code:'SWI-003',title:'Elevating work platform (EWP) operation',hz:['Heights','Plant & tools'],mins:4,
+ purpose:'Operating scissor lifts and boom lifts safely, including licensing and harness requirements.',
+ who:'Licensed EWP operators',points:['High-risk work licence (WP class) required for boom lifts over 11 m','Harness and lanyard mandatory in boom-type EWPs','Daily pre-start checklist before first use','Spotter required when slewing near structures or traffic']},
+{id:'swi-014',col:'swi',type:'swi',code:'SWI-014',title:'Working at heights',hz:['Heights'],mins:3,
+ purpose:'Applies to any task above 2 metres — ladders, EWPs and roof access.',
+ who:'All workers and supervisors',
+ before:['Heights work permit signed','Harness & lanyard inspected','Spotter on site','Wind under 35 km/h'],
+ do_:['Keep three points of contact','Tie off above 2 m at all times','Check anchor points are rated'],
+ dont:['Work alone at height','Use a ladder near live electrical parts','Leave tools unsecured at the edge'],
+ steps:[{t:'Set up the exclusion zone',d:'Barricade the area below the work zone. Minimum 2 m radius from the drop line, signage on every approach.'},{t:'Inspect and don fall protection',d:'Check harness webbing, stitching and hardware against the inspection tag. Connect to a rated anchor point before stepping out.'},{t:'Confirm the rescue plan',d:'Supervisor confirms retrieval method and emergency contact before work begins. A suspended worker must be reachable within 10 minutes.'},{t:'Work and monitor',d:'Spotter maintains line of sight. Stop work if wind exceeds 35 km/h or surfaces become wet.'}],
+ emergency:'If a fall occurs: do not attempt solo rescue. Call 000, then your supervisor. Keep the casualty in sight and talking.'},
+{id:'swi-019',col:'swi',type:'swi',code:'SWI-019',title:'Confined space entry',hz:['Confined space'],mins:5,
+ purpose:'Entry into risers, ceiling voids, plant rooms and tanks classified as confined spaces.',
+ who:'Trained and authorised entrants only',points:['Confined space entry permit mandatory before entry','Atmospheric testing before and during entry','Standby person stationed at the entry point at all times','Rescue equipment staged before anyone enters']},
+{id:'swi-022',col:'swi',type:'swi',code:'SWI-022',title:'Oxy-acetylene cutting',hz:['Hot works'],mins:3,
+ purpose:'Safe setup and use of oxy equipment, including flashback arrestors and cylinder handling.',
+ who:'Trained operators',points:['Hot works permit required in all occupied buildings','Flashback arrestors fitted at both regulator and handpiece','Fire watch maintained for 30 minutes after work ends']},
+{id:'swi-027',col:'swi',type:'swi',code:'SWI-027',title:'Angle grinder use',hz:['Plant & tools','Hot works'],mins:2,
+ purpose:'Safe use of angle grinders including guard, disc and two-handed operation requirements.',
+ who:'All workers using grinders',points:['Guard fitted and adjusted — no exceptions','Correct disc for the material, within expiry date','Two hands on the tool, work secured separately','Hot works permit when cutting generates sparks in occupied buildings']},
+{id:'swi-031',col:'swi',type:'swi',code:'SWI-031',title:'Manual handling and team lifts',hz:['Manual handling'],mins:2,
+ purpose:'Assessing loads, lifting technique and when to use mechanical aids or team lifts.',
+ who:'All workers',points:['Assess every load before lifting — weight, grip, path','Mechanical aid first, team lift second, solo lift last','Loads over 20 kg are a two-person or mechanical lift']},
+{id:'swi-036',col:'swi',type:'swi',code:'SWI-036',title:'Refrigerant handling',hz:['Dust & fumes'],mins:4,
+ purpose:'Charging, recovering and transporting refrigerants, including ventilation and licensing.',
+ who:'ARCtick licensed technicians',points:['ARCtick licence required for all refrigerant work','Recover — never vent — refrigerant to atmosphere','Ventilate plant rooms before and during charging','A2L and flammable refrigerants follow the additional controls in SWMS-A']},
+{id:'swi-042',col:'swi',type:'swi',code:'SWI-042',title:'Crystalline silica dust control',hz:['Dust & fumes'],mins:3,
+ purpose:'Controls for cutting, grinding or drilling concrete and masonry — wet methods, extraction and RPE.',
+ who:'All workers cutting masonry or concrete',points:['Uncontrolled dry cutting of engineered stone and concrete is prohibited','Use wet cutting or on-tool extraction (H-class)','Fit-tested P2 respirator minimum where dust is generated']},
+{id:'swi-055',col:'swi',type:'swi',code:'SWI-055',title:'Working near live electrical parts',hz:['Electrical'],mins:3,
+ purpose:'Exclusion zones, isolation and permits when working near energised equipment or cables.',
+ who:'All workers; isolations by licensed electricians',points:['Treat every circuit as live until isolated, locked and tested','No work within 500 mm of exposed live parts without isolation','Cable location scan before any drilling or cutting into slabs and walls']},
+{id:'swi-060',col:'swi',type:'swi',code:'SWI-060',title:'Mobile scaffold erection and use',hz:['Heights'],mins:3,
+ purpose:'Erecting, moving and working from aluminium mobile scaffolds under 4 metres.',
+ who:'Trained erectors and users',points:['Castors locked before anyone climbs','Never move a scaffold with a person or materials on it','Internal ladder access only — no climbing the frame']},
+{id:'swi-068',col:'swi',type:'swi',code:'SWI-068',title:'Hot works in occupied buildings',hz:['Hot works'],mins:3,
+ purpose:'Welding, cutting and grinding in occupied or operating facilities — permits, isolation and fire watch.',
+ who:'All workers performing hot works',points:['Hot works permit signed by the facility manager before ignition sources are introduced','Smoke detection isolated and reinstated through the facility — never by the crew alone','Fire extinguisher within 3 m, fire watch for 30 minutes after completion']},
+/* ---- SWMS ---- */
+{id:'swms-a',col:'swms',type:'swms',code:'SWMS-A',title:'Mechanical services installation',hz:['Heights','Manual handling','Plant & tools'],mins:6,
+ purpose:'Ductwork, piping and plant installation across new construction and fit-out sites.',
+ who:'Whole crew — reviewed at pre-start',points:['Covers work at height, crane and material handling, and power tool use','Review with the crew before starting and re-sign after any change','Site-specific hazards are added on the first page before signing']},
+{id:'swms-b',col:'swms',type:'swms',code:'SWMS-B',title:'Roof access works',hz:['Heights'],mins:5,
+ purpose:'All work on or over roofs — plant maintenance, ductwork penetrations, flashing and condenser installs.',
+ who:'Whole crew — reviewed at pre-start',
+ scope:'Applies to any task requiring access onto a roof surface, including via fixed ladders, EWPs or roof hatches. Read together with SWI-014 Working at heights.',
+ hrcw:['Risk of a person falling more than 2 metres','Work on or near energised electrical installations (roof-mounted plant)'],
+ hzblocks:[
+  {h:'Fall from roof edge or through fragile surface',r:'high',c:['Physical edge protection or rated anchor points with harness — selected before access','Fragile surfaces (skylights, old sheeting) identified and barricaded on the roof plan','Roof access permit signed by the supervisor each day']},
+  {h:'Falling objects onto people below',r:'high',c:['Exclusion zone barricaded below the work area with signage','Tools lanyarded or contained; no loose materials within 2 m of edges']},
+  {h:'Contact with roof-mounted electrical plant',r:'med',c:['Isolation and lock-out of plant being worked on, verified by test','500 mm exclusion from any exposed live parts (see SWI-055)']},
+  {h:'Heat stress and UV exposure',r:'med',c:['Work scheduled outside peak heat where possible; water on the roof','Mandatory rest breaks above 32°C per the fatigue policy']}]},
+{id:'swms-c',col:'swms',type:'swms',code:'SWMS-C',title:'Demolition and cutting works',hz:['Dust & fumes','Hot works','Plant & tools'],mins:6,
+ purpose:'Strip-out and demolition of existing mechanical services, including cutting, asbestos awareness and silica controls.',
+ who:'Whole crew — reviewed at pre-start',points:['Asbestos register reviewed before any cutting into existing fabric','Silica controls per SWI-042 for all concrete and masonry cutting','Services isolation verified before disconnection']},
+/* ---- Forms ---- */
+{id:'f-01',col:'forms-site',type:'form',code:'F-01',title:'Incident & near miss report',mins:5,
+ purpose:'Report any incident, injury or near miss within 24 hours so it can be investigated and notifiable events escalated.',
+ who:'Anyone involved in or witnessing an incident',
+ when:'Complete within 24 hours of any injury, property damage or near miss — however minor. Your supervisor submits it to the safety manager, who determines whether it\'s notifiable to the regulator.',
+ need:['Date, time and exact location','Names of people involved and witnesses','What happened, in your own words','Photos if safe to take them'],
+ fields:[{l:'Date and time of incident',k:'input'},{l:'Site / project',k:'input'},{l:'Type',k:'select',o:'Near miss · First aid injury · Medical treatment · Property damage'},{l:'What happened?',k:'textarea'},{l:'Witnesses',k:'input'}]},
+{id:'f-02',col:'forms-site',type:'form',code:'F-02',title:'Working at heights permit',mins:4,
+ purpose:'Daily authorisation for any work above 2 metres — confirms controls from SWI-014 are in place before access.',
+ who:'Supervisor issues; crew signs on',
+ when:'Before any work at height starts, each day. A new permit is required if conditions change (weather, access method, crew).',
+ need:['Task description and location','Access method (ladder / EWP / roof)','Anchor points or edge protection confirmed','Rescue plan and contact'],
+ fields:[{l:'Task and location',k:'input'},{l:'Access method',k:'select',o:'Ladder · EWP · Roof access · Scaffold'},{l:'Rescue plan confirmed by',k:'input'},{l:'Crew sign-on',k:'textarea'}]},
+{id:'f-03',col:'forms-site',type:'form',code:'F-03',title:'Toolbox talk record',mins:3,
+ purpose:'Record of the daily or weekly crew briefing — topic, attendees and any issues raised.',
+ who:'Supervisor leads; all attendees sign',points:['Run at least weekly, and daily on high-risk sites','Issues raised must be assigned an owner and tracked to close-out']},
+{id:'f-04',col:'forms-site',type:'form',code:'F-04',title:'Plant pre-start checklist',mins:2,
+ purpose:'Daily check of mobile plant and powered equipment before first use.',
+ who:'The operator, before first use each day',points:['Faults tag the plant out of service immediately','Completed checklists stay with the plant logbook']},
+{id:'f-05',col:'forms-site',type:'form',code:'F-05',title:'Site safety inspection',mins:6,
+ purpose:'Weekly walk-through inspection of the site against a standard checklist.',
+ who:'Supervisor or safety advisor',points:['Scores housekeeping, access, electrical, heights and amenities','Actions assigned with due dates; reviewed at the next inspection']},
+{id:'f-10',col:'forms-office',type:'form',code:'F-10',title:'Worker induction record',mins:4,
+ purpose:'Confirms each new worker has completed company and site induction before starting work.',
+ who:'Safety manager / office',points:['Covers policies, emergency procedures and the role of SWMS','Licences and tickets verified and copied at induction']},
+{id:'f-11',col:'forms-office',type:'form',code:'F-11',title:'Training & competency register',mins:3,
+ purpose:'Live register of licences, tickets and training with expiry tracking.',
+ who:'Safety manager / office',points:['Expiring licences flagged 60 days out','Linked to roles so gaps are visible per person']},
+{id:'f-12',col:'forms-office',type:'form',code:'F-12',title:'SWMS review register',mins:3,
+ purpose:'Tracks when each SWMS was last reviewed, by whom, and what changed.',
+ who:'Safety manager',points:['SWMS reviewed after any incident, change of method, or 12 months — whichever comes first']},
+/* ---- Policies ---- */
+{id:'pol-01',col:'policies',type:'policy',code:'POL-01',title:'Work health & safety policy',mins:2,
+ purpose:'The company\'s overarching commitment to the health and safety of everyone affected by its work.',
+ who:'Everyone — read at induction',
+ statement:'No job is so urgent that it cannot be done safely. We are committed to providing a workplace where every worker, subcontractor and visitor goes home in the same condition they arrived.',
+ commitments:['Comply with the WHS Act, Regulations and applicable codes of practice','Consult workers on decisions that affect their health and safety','Provide the training, equipment and supervision needed to work safely','Investigate every incident and act on what we learn','Review this policy annually and publish all changes'],
+ resp:[{r:'Directors',d:'Set the policy, resource the system, exercise due diligence'},{r:'Managers & supervisors',d:'Implement the system on every site and lead by example'},{r:'All workers',d:'Follow safe work procedures, report hazards and incidents, look out for each other'}]},
+{id:'pol-02',col:'policies',type:'policy',code:'POL-02',title:'Fitness for Work Policy',mins:2,
+ purpose:'Ensuring everyone is in a fit state — physically and mentally — to work safely, covering fatigue, illness and impairment.',
+ who:'Everyone; supervisors enforce',points:['Workers must present fit for duty and report anything affecting their fitness for work','Fatigue is a valid reason to stop work — no questions asked','Supervisors may stand down a worker who is not fit to work safely']},
+{id:'pol-03',col:'policies',type:'policy',code:'POL-03',title:'Mobile Phone Usage Policy',mins:2,
+ purpose:'Rules for safe and appropriate use of mobile phones on site, in vehicles and in the workplace.',
+ who:'Everyone',points:['No handheld phone use while operating plant, tools or vehicles','Designated safe areas for calls on active sites','Hands-free only, and only where it does not distract from the task']},
+{id:'pol-04',col:'policies',type:'policy',code:'POL-04',title:'Use of Motor Vehicles Policy',mins:2,
+ purpose:'Requirements for driving company and private vehicles for work, including licensing, condition and conduct.',
+ who:'Anyone driving for work',points:['Current licence appropriate to the vehicle class','Pre-use checks and reporting of defects','Journey management for long-distance and remote travel']},
+{id:'pol-05',col:'policies',type:'policy',code:'POL-05',title:'Privacy Policy',mins:2,
+ purpose:'How the company collects, uses, stores and protects personal information in line with the Privacy Act.',
+ who:'Everyone; managed by the office',points:['Personal information collected only for legitimate business purposes','Records kept secure and access limited to those who need it','Workers may request access to their own personal information']},
+{id:'pol-06',col:'policies',type:'policy',code:'POL-06',title:'Harassment, Bullying and Discrimination Policy',mins:2,
+ purpose:'The company\'s zero-tolerance stance on harassment, bullying and discrimination, and how to raise a concern.',
+ who:'Everyone',points:['All workers have the right to a safe and respectful workplace','Behaviour that intimidates, humiliates or excludes is not tolerated','Concerns can be raised confidentially without fear of victimisation']},
+{id:'pol-07',col:'policies',type:'policy',code:'POL-07',title:'Employee Grievance Policy',mins:2,
+ purpose:'A fair, consistent process for workers to raise and resolve workplace grievances.',
+ who:'Everyone',points:['Grievances handled promptly, fairly and confidentially','Resolution sought at the lowest level first, with escalation if needed','No detriment for raising a genuine grievance']},
+{id:'pol-08',col:'policies',type:'policy',code:'POL-08',title:'Working from Home Policy',mins:2,
+ purpose:'Health, safety and conduct expectations when working from a home or remote location.',
+ who:'Office and eligible workers',points:['Home workspace meets basic ergonomic and safety requirements','Same conduct, data and confidentiality standards apply as in the office','Arrangements agreed with the manager in advance']},
+{id:'pol-09',col:'policies',type:'policy',code:'POL-09',title:'Drug and Alcohol Policy',mins:2,
+ purpose:'Zero-tolerance approach to impairment at work, including testing and support pathways.',
+ who:'Everyone',points:['Random and for-cause testing applies on all sites','Self-referral for support carries no disciplinary consequence','Prescription medication that may impair must be declared to a supervisor']},
+{id:'pol-10',col:'policies',type:'policy',code:'POL-10',title:'Modern Slavery Policy',mins:2,
+ purpose:'The company\'s commitment to identifying and preventing modern slavery in its operations and supply chain.',
+ who:'Management and procurement',points:['Suppliers assessed for modern slavery risk','Workers and suppliers can report concerns confidentially','Commitment to remediation where risks are identified']},
+/* ---- Site Safety Plan ---- */
+{id:'ssp-01',col:'sitesafety',type:'plan',code:'SSP-01',title:'Site Safety Plan template',mins:5,
+ purpose:'The project-level plan that pulls the whole system together for one site — completed before work starts and kept on site.',
+ who:'Project managers and site supervisors',
+ when:'Prepared before mobilising to a new site and reviewed when the scope, hazards or personnel change. It draws on the policies, procedures, SWMS and SWIs that apply to the project.',
+ need:['Site and client details, key dates','Site-specific hazards and the SWMS that apply','Emergency arrangements, first aiders and nearest hospital','Induction, permit and consultation arrangements'],
+ fields:[{l:'Project / site name',k:'input'},{l:'Principal contractor',k:'input'},{l:'High-risk activities on this site',k:'textarea'},{l:'Emergency assembly point',k:'input'},{l:'Site first aider',k:'input'}]},
+/* ---- Roles ---- */
+{id:'rr-01',col:'roles',type:'role',code:'RR-01',title:'Officers & directors',mins:3,
+ purpose:'Due diligence duties of company officers under the WHS Act.',who:'Directors and officers',
+ points:['Keep up-to-date knowledge of WHS matters','Ensure resources and processes exist to eliminate or minimise risk','Verify the system is actually used — not just documented']},
+{id:'rr-02',col:'roles',type:'role',code:'RR-02',title:'Project manager',mins:3,
+ purpose:'Safety accountabilities when planning and running projects.',who:'Project managers',
+ points:['SWMS in place and reviewed before high-risk work starts','Subcontractor inductions and documentation verified','Incidents escalated and investigated per PRO-04']},
+{id:'rr-03',col:'roles',type:'role',code:'RR-03',title:'Site supervisor',mins:3,
+ purpose:'The front-line safety role: permits, pre-starts, toolbox talks and stop-work authority.',who:'Site supervisors and leading hands',
+ points:['Issues and closes daily permits (heights, hot works, confined space)','Runs pre-starts and toolbox talks; records on F-03','Holds and uses stop-work authority when controls are not in place']},
+{id:'rr-04',col:'roles',type:'role',code:'RR-04',title:'Workers',mins:2,
+ purpose:'What every worker is responsible for, every day.',who:'All workers including apprentices',
+ points:['Follow the SWI and SWMS that apply to the task','Report hazards, near misses and incidents the same day','Use and look after the PPE provided']},
+{id:'rr-05',col:'roles',type:'role',code:'RR-05',title:'Safety advisor',mins:3,
+ purpose:'Supporting sites with inspections, investigations and system maintenance.',who:'Safety advisor / manager',
+ points:['Maintains the manual, registers and training records','Leads incident investigations and regulator notifications','Reports system performance to directors quarterly']},
+/* ---- Procedures ---- */
+{id:'pro-01',col:'procedures',type:'procedure',code:'PRO-01',title:'Risk management & hazard identification',mins:5,
+ purpose:'How hazards are identified, assessed and controlled using the hierarchy of controls.',
+ who:'Supervisors and safety advisor',points:['Hazard identification at project start, daily pre-starts and inspections','Hierarchy of controls applied — elimination first, PPE last','Risk register maintained per project']},
+{id:'pro-04',col:'procedures',type:'procedure',code:'PRO-04',title:'Incident reporting & investigation',mins:6,
+ purpose:'What happens after an incident is reported — from first response through investigation to corrective actions.',
+ who:'Supervisors and safety advisor',
+ psteps:[
+  {t:'Respond and make safe',d:'First aid and emergency response come first. Preserve the scene if the incident may be notifiable — nothing is moved except to help someone or make the area safe.'},
+  {t:'Report within 24 hours',d:'Anyone involved or witnessing completes F-01 Incident & near miss report. The supervisor submits it to the safety advisor the same day.'},
+  {t:'Assess notifiability',d:'The safety advisor assesses against the WHS Act criteria. Notifiable incidents are reported to the regulator immediately by phone, and the scene preserved until released.'},
+  {t:'Investigate proportionately',d:'Near misses get a 5-why review at the next toolbox talk. Injuries and high-potential events get a formal ICAM-style investigation within 7 days.'},
+  {t:'Action and close out',d:'Corrective actions are assigned with owners and due dates, tracked in the register, and verified before close-out. Learnings are shared at toolbox talks across all sites.'}]},
+{id:'pro-07',col:'procedures',type:'procedure',code:'PRO-07',title:'Consultation & communication',mins:4,
+ purpose:'How workers are consulted — toolbox talks, safety committee and issue resolution.',
+ who:'Supervisors; all workers participate',points:['Toolbox talks weekly minimum, recorded on F-03','Safety issues resolved at the lowest level, escalated if unresolved in 48 hours']},
+{id:'pro-10',col:'procedures',type:'procedure',code:'PRO-10',title:'Training & competency',mins:4,
+ purpose:'Induction, licensing and verification of competency requirements per role.',
+ who:'Safety advisor and office',points:['No worker starts without induction (F-10)','Licences verified at engagement and tracked in F-11']},
+{id:'pro-14',col:'procedures',type:'procedure',code:'PRO-14',title:'Emergency preparedness & response',mins:5,
+ purpose:'Emergency plans, drills and first aid arrangements for sites and the workshop.',
+ who:'Supervisors and wardens',points:['Site emergency plan posted before work starts','First aid kit and trained first aider per crew','Evacuation drill within the first month of long-duration sites']},
+{id:'pro-18',col:'procedures',type:'procedure',code:'PRO-18',title:'Contractor & supplier management',mins:4,
+ purpose:'Pre-qualification, induction and monitoring of subcontractors and suppliers.',
+ who:'Project managers',points:['Pre-qualification questionnaire before first engagement','Subcontractor SWMS reviewed and accepted before mobilisation']},
+{id:'pro-22',col:'procedures',type:'procedure',code:'PRO-22',title:'Plant & equipment management',mins:4,
+ purpose:'Registers, inspection schedules and maintenance for plant, tools and test equipment.',
+ who:'Workshop manager and supervisors',points:['Plant register with service schedules','Electrical test & tag per AS/NZS 3760']},
+{id:'pro-27',col:'procedures',type:'procedure',code:'PRO-27',title:'Document control',mins:3,
+ purpose:'How documents are created, approved, published and superseded — the rules behind this hub.',
+ who:'Safety advisor',points:['Only the published version in this hub is current — printed copies are uncontrolled','Every publication writes an entry to the amendment register automatically']},
+/* ---- ISO ---- */
+{id:'msp-01',col:'iso',type:'iso',code:'MSP-01',title:'Context of the organisation',mins:3,purpose:'Internal and external issues, interested parties and the scope of the management system.',who:'Management and auditors',points:['Reviewed annually at the management review','Defines the boundary of ISO 45001 certification']},
+{id:'msp-02',col:'iso',type:'iso',code:'MSP-02',title:'Leadership & worker participation',mins:3,purpose:'How leadership commitment and worker consultation are demonstrated.',who:'Management and auditors',points:['Links to POL-01 and PRO-07','Evidence: committee minutes, toolbox records, management walks']},
+{id:'msp-03',col:'iso',type:'iso',code:'MSP-03',title:'Planning',mins:3,purpose:'Risk and opportunity planning, legal requirements and WHS objectives.',who:'Management and auditors',points:['Annual objectives with measurable targets','Legal register reviewed quarterly']},
+{id:'msp-04',col:'iso',type:'iso',code:'MSP-04',title:'Support',mins:3,purpose:'Resources, competence, awareness, communication and documented information.',who:'Management and auditors',points:['Links training (PRO-10) and document control (PRO-27) to the standard']},
+{id:'msp-05',col:'iso',type:'iso',code:'MSP-05',title:'Operation',mins:3,purpose:'Operational planning, eliminating hazards, management of change and procurement.',who:'Management and auditors',points:['Maps SWMS and SWI framework to clause 8','Management of change checklist for new methods and equipment']},
+{id:'msp-06',col:'iso',type:'iso',code:'MSP-06',title:'Performance evaluation',mins:3,purpose:'Monitoring, internal audit and management review.',who:'Management and auditors',points:['Internal audit schedule — full system every 12 months','KPIs reported to directors quarterly']},
+{id:'msp-07',col:'iso',type:'iso',code:'MSP-07',title:'Improvement',mins:3,purpose:'Incident learning, nonconformity and continual improvement.',who:'Management and auditors',points:['Corrective actions tracked from PRO-04 investigations','Improvement register reviewed at management review']},
+/* ---- Intro & register ---- */
+{id:'int-01',col:'intro',type:'intro',code:'START',title:'How this manual works',mins:2,
+ purpose:'A two-minute orientation: what each document type is, when you\'d use it, and how to find things.',
+ who:'Anyone new to AMCA documents',
+ points:['Policies say what we commit to. Procedures say how the system runs. SWMS plan high-risk work packages. SWIs tell you how to do a single task safely. Forms record that it happened.',
+ 'On site? You\'ll live in "Do a job safely" and "Find a form". In the office? "Understand the system" is yours.',
+ 'Search understands plain language — try "roof paperwork" or "grinder". Or ask the Safety Assistant, bottom right.',
+ 'The web page is always the current version. Downloads and prints are uncontrolled copies.']},
+{id:'reg-01',col:'register',type:'register',code:'REG',title:'Amendment register',mins:2,
+ purpose:'Every change to every document, written automatically when a new version is published.',
+ who:'Auditors, safety advisor — and anyone checking currency',
+ amendments:[['12 Jun 2026','SWI-014 Working at heights','v3.1','Wind limit aligned to 35 km/h across all heights documents'],['28 May 2026','SWMS-B Roof access works','v2.4','Fragile surface mapping step added after near miss NM-1182'],['20 Apr 2026','Full manual','—','Migrated to AMCA Safety Hub; all sections republished'],['02 Apr 2026','POL-03 Fatigue management','v1.7','Extreme heat rest breaks added for QLD summer works'],['11 Mar 2026','F-01 Incident & near miss report','v4.0','Near-miss category split from property damage']]}
+];
+const OLDMAP=[['00','Cover & contents','This page — everything is one search away',''],
+['01','Introduction','Start here: how this manual works','doc:int-01'],
+['02','Safety policies','Understand the system → Policies','lib:policies'],
+['03','Roles & responsibilities','Understand the system → Roles','lib:roles'],
+['04','Safety system procedures','Understand the system → Procedures','lib:procedures'],
+['05','Safe work method statements','Do a job safely → SWMS','lib:swms'],
+['06','Safe work instructions','Do a job safely → Instructions','lib:swi'],
+['07','Safety forms & templates','Find a form or template','path:forms'],
+['08','Management system procedures','Understand the system → ISO 45001','lib:iso'],
+['09','Site Safety Plan','Understand the system → Site Safety Plan','doc:ssp-01'],
+['10','Amendment register','Auto-maintained register','doc:reg-01']];
+/* ============ full section index (the Library module) ============ */
+const SECTIONS=[
+ {num:'00',name:'Cover & Contents',type:null,count:'',
+  what:'The front of the manual. In the hub, this is your home page and this index — there\'s no separate cover to read.',comps:[],home:true},
+ {num:'01',name:'Introduction',type:'intro',count:'1 document',
+  what:'A short orientation to the whole system: what each document type is and how they fit together. The best place to start if you\'re new.',comps:['int-01']},
+ {num:'02',name:'Safety Policies',type:'policy',count:'10 policies',
+  what:'Management\'s signed commitments — the "what we stand for" of the manual. Each is a one-page statement.',
+  comps:['pol-01','pol-02','pol-03','pol-04','pol-05','pol-06','pol-07','pol-08','pol-09','pol-10']},
+ {num:'03',name:'Safety Roles & Responsibilities',type:'role',count:'9 roles',sample:'5 of 9',
+  what:'Who is responsible for what, from directors down to apprentices. Find your role to see your safety duties.',
+  comps:['rr-01','rr-02','rr-03','rr-04','rr-05']},
+ {num:'04',name:'Safety System Procedures',type:'procedure',count:'33 procedures',sample:'8 of 33',
+  what:'How the system actually runs day to day — risk management, incidents, training, emergencies. The engine room.',
+  comps:['pro-01','pro-04','pro-07','pro-10','pro-14','pro-18','pro-22','pro-27']},
+ {num:'05',name:'Safe Work Method Statements',type:'swms',count:'3 work packages',
+  what:'The legally required plans for high-risk construction work — hazards, risk levels and controls for whole work packages.',
+  comps:['swms-a','swms-b','swms-c']},
+ {num:'06',name:'Safe Work Instructions',type:'swi',count:'72 instructions',sample:'12 of 72',
+  what:'One instruction per task — the day-to-day field reference. What to check, what to do, what never to do.',
+  comps:['swi-001','swi-003','swi-014','swi-019','swi-022','swi-027','swi-031','swi-036','swi-042','swi-055','swi-060','swi-068']},
+ {num:'07',name:'Safety Forms & Templates',type:'form',count:'2 folders',sample:'8 of 14',
+  what:'The paperwork side — permits, checklists, reports and registers that record safety actually happened.',
+  comps:['f-01','f-02','f-03','f-04','f-05','f-10','f-11','f-12']},
+ {num:'08',name:'Management System Procedures (ISO 45001)',type:'iso',count:'7 procedures',
+  what:'The framework documents that align the system with ISO 45001, mapped clause by clause. Mostly for management and auditors.',
+  comps:['msp-01','msp-02','msp-03','msp-04','msp-05','msp-06','msp-07']},
+ {num:'09',name:'Site Safety Plan',type:'plan',count:'1 template',
+  what:'The project-level plan prepared for each site, pulling together the policies, SWMS and instructions that apply to that job.',
+  comps:['ssp-01']},
+ {num:'10',name:'Amendment Register',type:'register',count:'Auto-maintained',
+  what:'A complete history of every change to every document — written automatically each time something is published.',
+  comps:['reg-01']}
+];
+/* ============ render helpers ============ */
+const $=s=>document.querySelector(s);
+const app=$('#app');
+const IC={
+ tool:'<path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>',
+ file:'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/>',
+ book:'<path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>',
+ check:'<path d="M20 6L9 17l-5-5"/>',
+ info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
+ search:'<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',
+ dl:'<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>',
+ print:'<path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><path d="M6 14h12v8H6z"/>',
+ warn:'<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/>',
+ arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',
+ index:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+ layers:'<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>'};
+const svg=(n,st='')=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="${st}">${IC[n]}</svg>`;
+const badge=t=>`<span class="badge ${TYPES[t].cls}">${TYPES[t].label}</span>`;
+const crumbs=items=>`<nav class="crumbs" aria-label="Breadcrumb">${items.map((c,i)=>i<items.length-1?`<a href="#" onclick="event.preventDefault();go('${c[1]}')">${c[0]}</a><span class="sep">›</span>`:`<span>${c[0]}</span>`).join('')}</nav>`;
+const ctxBox=t=>t?`<div class="context">${svg('info')}<span><strong style="font-weight:600">New here?</strong> ${t}</span></div>`:'';
+const docCard=d=>`<a class="card doc-card" href="#" onclick="event.preventDefault();go('doc:${d.id}')">
+ <div class="row">${badge(d.type)}<span class="meta">${d.code} · ${d.mins} min read</span></div>
+ <div class="t">${d.title}</div><div class="p">${d.purpose}</div>
+ ${d.hz?`<div class="row" style="margin-top:2px">${d.hz.map(h=>`<span class="meta" style="border:1px solid var(--line);border-radius:99px;padding:1px 8px">${h}</span>`).join('')}</div>`:''}</a>`;
+const colorMap={orange:['var(--orange-soft)','var(--orange)'],purple:['var(--purple-soft)','var(--purple)'],teal:['var(--teal-soft)','var(--teal)']};
+/* ============ views ============ */
+function viewHome(){
+ app.innerHTML=`
+ <section class="hero">
+  <div class="eyebrow">AMCA WHS &amp; integrated management system</div>
+  <h1>What do you need to do?</h1>
+  <p>Every safety document your crew needs — readable on any device, always the current version. Search it, browse it, or just ask.</p>
+  <button class="bigsearch" onclick="openSearch()">${svg('search')}Try "working at heights", "incident report" or "toolbox talk"…</button>
+  <div class="trychips">${['working at heights','confined space','incident report','toolbox talk','grinder'].map(q=>`<button class="chip" onclick="openSearch('${q}')">${q}</button>`).join('')}</div>
+ </section>
+ <section class="grid paths">
+ ${Object.entries(PATHS).map(([id,p])=>`<button class="card path-card" onclick="go('path:${id}')">
+   <span class="ic" style="background:${colorMap[p.color][0]};color:${colorMap[p.color][1]}">${svg(p.icon)}</span>
+   <h2>${p.title}</h2><span class="d">${p.d}</span>
+   <span class="go">Browse ${svg('arrow','width:14px;height:14px')}</span></button>`).join('')}
+ </section>
+ <button class="libhome" onclick="go('index')">
+  <span class="lh-ic">${svg('layers')}</span>
+  <span><h2>See the whole manual</h2><span class="d">Not sure where something lives? Browse the complete index — all 11 sections from Cover to Amendment Register, each one expanding to show every document inside.</span></span>
+  <span class="go">Open the full index ${svg('arrow','width:14px;height:14px')}</span>
+ </button>
+ <section class="most">
+  <h2>Most used this month</h2>
+  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(230px,1fr));margin-top:14px">
+   ${['swi-014','f-01','swms-b','f-03'].map(id=>docCard(DOCS.find(d=>d.id===id))).join('')}
+  </div>
+ </section>
+ ${foot()}`;
+}
+function viewPath(id){
+ const p=PATHS[id];
+ app.innerHTML=`${crumbs([['Home','home'],[p.title]])}
+ <div style="margin-top:14px"><h1>${p.title}</h1><p class="sub">${p.d}</p></div>
+ ${ctxBox(p.ctx)}
+ <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr))">
+ ${p.cols.map(cid=>{const c=COLS[cid];
+  if(cid==='intro')return docCardCol(c,'doc:int-01');
+  if(cid==='register')return docCardCol(c,'doc:reg-01');
+  if(cid==='sitesafety')return docCardCol(c,'doc:ssp-01');
+  return docCardCol(c,'lib:'+cid);}).join('')}
+ </div>${foot()}`;
+}
+function docCardCol(c,dest){
+ return `<a class="card doc-card" href="#" onclick="event.preventDefault();go('${dest}')">
+ <div class="row">${badge(c.type)}<span class="meta">Section ${c.sec} · ${c.count}</span></div>
+ <div class="t" style="font-family:var(--display);font-size:15.5px">${c.title}</div>
+ <div class="p">${c.d}</div>
+ <span style="font-size:12.5px;font-weight:600;color:var(--orange);margin-top:2px">Open ›</span></a>`;
+}
+let hzFilter=null;
+function viewLib(cid){
+ const c=COLS[cid],p=PATHS[c.path];
+ let docs=DOCS.filter(d=>d.col===cid);
+ const isSwi=cid==='swi';
+ if(isSwi&&hzFilter)docs=docs.filter(d=>(d.hz||[]).includes(hzFilter));
+ app.innerHTML=`${crumbs([['Home','home'],[p.title,'path:'+c.path],[c.title]])}
+ <div style="margin-top:14px"><div class="row">${badge(c.type)}<span class="meta">Section ${c.sec} · ${c.count}</span></div>
+ <h1 style="margin-top:8px">${c.title}</h1><p class="sub">${c.d}</p></div>
+ ${ctxBox(c.ctx)}
+ ${isSwi?`<div class="row" style="margin-bottom:18px"><span class="meta" style="margin-right:4px">Filter by hazard:</span>
+  <button class="chip ${!hzFilter?'on':''}" onclick="hzFilter=null;viewLib('swi')">All</button>
+  ${HAZARDS.map(h=>`<button class="chip ${hzFilter===h?'on':''}" onclick="hzFilter='${h}';viewLib('swi')">${h}</button>`).join('')}</div>`:''}
+ <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(265px,1fr))">${docs.map(docCard).join('')||'<p class="meta">No documents match this filter.</p>'}</div>
+ <p class="note">Prototype shows a representative sample of this library. ${isSwi?'The full hub carries all 72 instructions.':''}</p>
+ ${foot()}`;
+}
+/* ============ library: the full section index ============ */
+const TYPE_LEGEND=['policy','procedure','swms','swi','form','iso'];
+function viewLibrary(){
+ const total=DOCS.length;
+ app.innerHTML=`${crumbs([['Home','home'],['Full index of the manual']])}
+ <div class="libhead" style="margin-top:14px">
+  <h1>The complete manual, top to bottom</h1>
+  <p class="sub">Every section of the AMCA WHS &amp; integrated management system, in order. This is the whole map — expand any section to see what's inside, then open any document to read it. The manual runs from Section 00 to Section 10 and is aligned to ISO 45001.</p>
+  <div class="context" style="margin:16px 0 0">${svg('info')}<span><strong style="font-weight:600">Used the old manual?</strong> The sections are in the same 00&ndash;10 order you know &mdash; now each one expands to show every document inside, ready to read. Nothing was removed or renumbered.</span></div>
+ </div>
+ <h2 style="margin-top:26px;font-size:15px">The manual is built from six kinds of document</h2>
+ <p class="sub" style="margin-top:4px">Knowing these makes the whole thing easy to navigate — every item in the index below is one of these.</p>
+ <div class="legend">
+ ${TYPE_LEGEND.map(t=>`<div class="leg">${badge(t)}<div class="lt">${TYPES[t].name}</div><div class="ld">${LEG_DESC[t]}</div></div>`).join('')}
+ </div>
+ <h2 style="margin-top:30px;font-size:15px">Index — Sections 00 to 10</h2>
+ <p class="sub" style="margin-top:4px">Tap a section to expand it.</p>
+ <div class="idx">
+ ${SECTIONS.map(s=>sectionRow(s)).join('')}
+ </div>
+ <p class="note">This prototype carries a representative sample of the larger libraries (Safe Work Instructions, Procedures, Forms). The full hub holds every document, and the index is generated from the same metadata that powers search and the assistant — so it can never fall out of sync with the manual.</p>
+ ${foot()}`;
+}
+const LEG_DESC={
+ policy:'A signed, one-page statement of what the company commits to. The "what we stand for".',
+ procedure:'A process the system runs — from trigger to close-out, step by step. The "how it works".',
+ swms:'The required plan for high-risk construction work: hazards, risk levels and controls.',
+ swi:'How to do one specific task safely. The everyday field reference.',
+ form:'The record that proves a safety action happened — permits, checklists, reports.',
+ iso:'A framework document mapping the system to the ISO 45001 standard, for management and audit.'};
+function sectionRow(s){
+ if(s.home){
+  return `<details class="sec"><summary>
+   <span class="snum">${s.num}</span>
+   <span><span class="sname">${s.name}</span><span class="swhat">${s.what}</span></span>
+   <span class="smeta"><span class="scount">Start here</span>${svg('arrow','width:16px;height:16px;stroke:var(--faint)')}</span>
+   </summary>
+   <div class="seclist"><button class="cmp" onclick="go('home')"><span class="cmp-code">HOME</span><span class="cmp-t">Go to the home page</span><span class="cmp-open">Open ›</span></button>
+   <button class="cmp" onclick="go('doc:int-01')"><span class="cmp-code">START</span><span class="cmp-t">How this manual works (2-min guide)</span><span class="cmp-open">Open ›</span></button></div>
+   </details>`;
+ }
+ const comps=s.comps.map(id=>DOCS.find(d=>d.id===id)).filter(Boolean);
+ return `<details class="sec"><summary>
+  <span class="snum">${s.num}</span>
+  <span><span class="sname">${s.name}</span><span class="swhat">${s.what}</span></span>
+  <span class="smeta">${s.type?badge(s.type):''}<span class="scount">${s.count}</span>${svg('arrow','width:16px;height:16px;stroke:var(--faint)')}</span>
+  </summary>
+  <div class="seclist">
+   ${s.sample?`<div class="sechint">Showing ${s.sample}</div>`:''}
+   ${comps.map(d=>`<button class="cmp" onclick="go('doc:${d.id}')"><span class="cmp-code">${d.code}</span><span class="cmp-t">${d.title}</span><span class="cmp-open">Open ›</span></button>`).join('')}
+  </div></details>`;
+}
+/* ============ document page ============ */
+function viewDoc(id){
+ const d=DOCS.find(x=>x.id===id);if(!d)return viewHome();
+ const c=COLS[d.col],p=PATHS[c.path];
+ const list=DOCS.filter(x=>x.col===d.col),i=list.indexOf(d);
+ const prev=list[i-1],next=list[i+1];
+ let body='';
+ if(d.before||d.steps){ /* SWI full template */
+  body=`
+  ${d.before?`<div class="panel"><h3>Before you start</h3><div class="reqs">${d.before.map(r=>`<div>${svg('check')}<span>${r}</span></div>`).join('')}</div></div>`:''}
+  ${d.do_?`<div class="dodont"><div class="dd dd-do"><h3>${svg('check','width:14px;height:14px')} Do</h3><ul>${d.do_.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+  <div class="dd dd-dont"><h3>✕ Don't</h3><ul>${d.dont.map(x=>`<li>${x}</li>`).join('')}</ul></div></div>`:''}
+  <h2 style="margin-top:24px">Steps</h2><div class="steps">${d.steps.map((s,n)=>`<div class="step"><span class="n">${n+1}</span><div><div class="t">${s.t}</div><div class="d">${s.d}</div></div></div>`).join('')}</div>
+  ${d.emergency?`<div class="warn">${svg('warn','width:15px;height:15px;vertical-align:-2px;margin-right:6px;display:inline')} <strong style="font-weight:600">If something goes wrong:</strong> ${d.emergency}</div>`:''}`;
+ }else if(d.statement){ /* Policy full */
+  body=`<div class="statement">“${d.statement}”</div>
+  <h2 style="margin-top:24px">We commit to</h2><div class="steps">${d.commitments.map(x=>`<div class="step"><span class="n" style="background:var(--blue-soft);color:var(--blue)">${svg('check','width:13px;height:13px')}</span><div class="t" style="font-weight:500">${x}</div></div>`).join('')}</div>
+  <h2 style="margin-top:24px">Who does what</h2>${d.resp.map(r=>`<div class="resp-row"><span class="r">${r.r}</span><span class="d">${r.d}</span></div>`).join('')}`;
+ }else if(d.fields){ /* Form full */
+  body=`<div class="panel"><h3>When to use this form</h3><p style="font-size:13.5px;color:var(--slate)">${d.when}</p></div>
+  <h2>What you'll need</h2><div class="steps">${d.need.map(x=>`<div class="step" style="padding:9px 0"><span class="n" style="background:var(--purple-soft);color:var(--purple)">${svg('check','width:13px;height:13px')}</span><div class="t" style="font-weight:500;font-size:13.5px">${x}</div></div>`).join('')}</div>
+  <h2 style="margin:24px 0 12px">Form preview</h2>
+  <div style="border:1px solid var(--line);border-radius:14px;padding:20px">
+  ${d.fields.map(f=>`<div class="field"><label>${f.l}</label>${f.k==='textarea'?'<textarea rows="3" disabled placeholder="Completed online or on the downloaded form"></textarea>':f.k==='select'?`<select disabled><option>${f.o}</option></select>`:'<input disabled placeholder="…">'}</div>`).join('')}
+  <div class="row" style="margin-top:6px"><button class="btn primary">Fill online — Phase 3</button><button class="btn">${svg('dl')} Download blank (Word)</button></div></div>`;
+ }else if(d.hzblocks){ /* SWMS full */
+  body=`<div class="panel"><h3>Scope</h3><p style="font-size:13.5px;color:var(--slate)">${d.scope}</p></div>
+  <h2>High-risk construction work covered</h2><div class="steps">${d.hrcw.map(x=>`<div class="step" style="padding:9px 0"><span class="n" style="background:var(--swms-soft);color:var(--swms-deep)">!</span><div class="t" style="font-weight:500;font-size:13.5px">${x}</div></div>`).join('')}</div>
+  <h2 style="margin:24px 0 12px">Hazards and controls</h2>
+  ${d.hzblocks.map(b=>`<div class="hz"><div class="hzt">${b.h}<span class="risk ${b.r}">${b.r==='high'?'HIGH RISK':'MEDIUM'}</span></div><ul>${b.c.map(x=>`<li>${x}</li>`).join('')}</ul></div>`).join('')}
+  <div class="warn">${svg('warn','width:15px;height:15px;vertical-align:-2px;margin-right:6px;display:inline')} <strong style="font-weight:600">Crew sign-on required.</strong> This SWMS must be reviewed with everyone doing the work before it starts, and re-signed after any change to the method.</div>`;
+ }else if(d.psteps){ /* Procedure full */
+  body=`<h2 style="margin-bottom:12px">The process, step by step</h2><p class="sub" style="margin-bottom:16px">Tap a step to see the detail. Each step names who acts and within what timeframe.</p>
+  ${d.psteps.map((s,n)=>`<details class="pstep" ${n===0?'open':''}><summary><span class="n">${n+1}</span>${s.t}<span class="chev">▾</span></summary><div class="d">${s.d}</div></details>`).join('')}`;
+ }else if(d.amendments){ /* Register */
+  body=`<div class="context" style="margin-top:4px">${svg('info')}<span>This register writes itself — every time a document is published, an entry is created automatically. Auditors can verify currency here without chasing version histories.</span></div>
+  <table class="reg"><thead><tr><th>Date</th><th>Document</th><th>Version</th><th>What changed</th></tr></thead>
+  <tbody>${d.amendments.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join('')}</tbody></table>`;
+ }else{ /* generic: points */
+  body=`<h2 style="margin-bottom:6px">Key points</h2><div class="steps">${(d.points||[]).map(x=>`<div class="step"><span class="n" style="background:var(--gray-soft);color:var(--grayt)">${svg('check','width:13px;height:13px')}</span><div class="t" style="font-weight:500;line-height:1.55">${x}</div></div>`).join('')}</div>
+  <p class="note">Full content for this document is migrated in Phase 1 ingestion — this page shows its summary and key requirements.</p>`;
+ }
+ const related=relatedDocs(d);
+ app.innerHTML=`<div class="docpage">${crumbs([['Home','home'],[p.title,'path:'+c.path],[c.title,'lib:'+d.col],[d.code]])}
+ <div class="dochead"><div>
+  <div class="row">${badge(d.type)}<span class="meta">${d.code} · ${d.mins} min read · v3.1</span></div>
+  <h1 style="margin-top:10px">${d.title}</h1>
+  <p class="sub">${d.purpose}</p>
+  <p class="meta" style="margin-top:8px"><strong style="font-weight:600;color:var(--slate)">Who this is for:</strong> ${d.who}</p>
+ </div>
+ <div class="row" style="flex-shrink:0">
+  <button class="btn" title="Download — generated from this page, branded for your company">${svg('dl')} Download</button>
+  <button class="btn" aria-label="Print">${svg('print')}</button>
+ </div></div>
+ <div class="docbody">${body}</div>
+ ${related.length?`<h2 style="margin-top:30px">Goes with this document</h2><div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin-top:12px">${related.map(docCard).join('')}</div>`:''}
+ <div class="docfoot"><span class="meta">Reviewed Apr 2026 · Next review Apr 2027 · Downloads are uncontrolled copies</span>
+ <span class="row">${prev?`<a class="pn" href="#" onclick="event.preventDefault();go('doc:${prev.id}')">‹ ${prev.code}</a>`:''}${next?`<a class="pn" href="#" onclick="event.preventDefault();go('doc:${next.id}')">${next.code} ›</a>`:''}</span></div>
+ ${foot()}</div>`;
+}
+const REL={'swi-014':['f-02','swms-b','swi-003'],'swms-b':['swi-014','f-02','swi-055'],'f-01':['pro-04','f-03'],'f-02':['swi-014','swms-b'],'pro-04':['f-01','msp-07'],'pol-01':['rr-01','int-01'],'swi-055':['swms-b','pro-22'],'int-01':['pol-01','swi-014','f-01']};
+function relatedDocs(d){return (REL[d.id]||[]).map(id=>DOCS.find(x=>x.id===id)).filter(Boolean);}
+function foot(){return `<footer><span>AMCA Safety Hub · Clickable prototype · ARM Hub × Aether</span><span>The web page is the controlled document — printed and downloaded copies are uncontrolled</span></footer>`;}
+/* ============ search ============ */
+function openSearch(q){$('#ovl').classList.add('open');const inp=$('#sq');inp.value=q||'';renderSearch(inp.value);setTimeout(()=>inp.focus(),30);}
+function closeSearch(){$('#ovl').classList.remove('open');}
+function renderSearch(q){
+ const box=$('#sres');q=(q||'').trim().toLowerCase();
+ const pool=q?DOCS.filter(d=>{
+  const hay=[d.title,d.code,d.purpose,d.who,(d.hz||[]).join(' '),TYPES[d.type].name].join(' ').toLowerCase();
+  return q.split(/\s+/).every(w=>hay.includes(w));
+ }):DOCS.filter(d=>['swi-014','f-01','f-03','int-01'].includes(d.id));
+ box.innerHTML=(q?'':'<p class="meta" style="padding:8px 12px 4px">Popular right now</p>')+(pool.slice(0,8).map(d=>`<button class="sr-item" onclick="closeSearch();go('doc:${d.id}')">${badge(d.type)}<span><span class="ti">${d.title}</span> <span class="meta">${d.code}</span><br><span class="pi">${d.purpose}</span></span></button>`).join('')||`<div class="sr-empty">Nothing matches “${q}”. Try a task word like <em>heights</em>, <em>permit</em> or <em>grinder</em> — or ask the Safety Assistant.</div>`);
+}
+$('#sq').addEventListener('input',e=>renderSearch(e.target.value));
+$('#sq').addEventListener('keydown',e=>{if(e.key==='Enter'){const f=$('#sres .sr-item');if(f)f.click();}if(e.key==='Escape')closeSearch();});
+$('#ovl').addEventListener('click',e=>{if(e.target.id==='ovl')closeSearch();});
+document.addEventListener('keydown',e=>{if(e.key==='/'&&!$('#ovl').classList.contains('open')&&!['INPUT','TEXTAREA'].includes(document.activeElement.tagName)){e.preventDefault();openSearch();}if(e.key==='Escape')closeSearch();});
+/* ============ assistant (prototype: keyword routing) ============ */
+function toggleAssist(open){$('#drawer').classList.toggle('open',open);$('#fab').style.display=open?'none':'flex';if(open)setTimeout(()=>$('#dq').focus(),30);}
+const INTENTS=[
+ {k:['roof'],a:'For roof work you\'ll want these three — review the SWMS with the crew first. On a ladder/EWP or full roof access?',d:['f-02','swms-b','swi-014']},
+ {k:['height','fall','ladder','ewp','scaffold'],a:'Working at height — here\'s the instruction, the daily permit and the EWP instruction if you\'re using one.',d:['swi-014','f-02','swi-003']},
+ {k:['incident','accident','injur','near miss','hurt'],a:'Sorry to hear it. Report it on this form within 24 hours — the procedure shows what happens next. If anyone is seriously hurt, call 000 first.',d:['f-01','pro-04']},
+ {k:['toolbox','prestart','pre-start','briefing'],a:'Here\'s the toolbox talk record, plus the consultation procedure that sets how often to run them.',d:['f-03','pro-07']},
+ {k:['grind','cut','silica','dust','concrete'],a:'Cutting work — the grinder instruction, silica dust controls, and the demolition SWMS if it\'s strip-out work.',d:['swi-027','swi-042','swms-c']},
+ {k:['confined','riser','tank','void'],a:'Confined space work needs a permit and a standby person — start with the entry instruction.',d:['swi-019']},
+ {k:['electric','live','isolat','power'],a:'Electrical — here\'s the instruction for working near live parts and the plant management procedure for isolations.',d:['swi-055','pro-22']},
+ {k:['weld','hot work','oxy','flame','torch'],a:'Hot works — the occupied-buildings instruction (permit required) and the oxy cutting instruction.',d:['swi-068','swi-022']},
+ {k:['induct','new starter','onboard'],a:'New starters: the induction record, plus the 2-minute guide to how the manual works.',d:['f-10','int-01']},
+ {k:['policy','commit'],a:'The policies live under "Understand the system". The WHS policy is the parent document.',d:['pol-01']},
+ {k:['fridge','refriger','gas','arctick'],a:'Refrigerant work — here\'s the handling instruction. ARCtick licensing applies.',d:['swi-036']},
+ {k:['lift','heavy','carry','manual handling'],a:'Manual handling — assess the load first; over 20 kg is a two-person or mechanical lift.',d:['swi-031']}];
+function askAssist(){
+ const inp=$('#dq'),q=inp.value.trim();if(!q)return;inp.value='';
+ const body=$('#dbody');
+ body.insertAdjacentHTML('beforeend',`<div class="msg-u">${q.replace(/</g,'&lt;')}</div>`);
+ const ql=q.toLowerCase();
+ if(/(what.*(in|contain|cover).*manual|whole manual|everything|full (index|list|contents)|all the section|table of contents|overview)/.test(ql)){
+  body.insertAdjacentHTML('beforeend',`<div class="msg-a">The manual has 11 sections, from Cover &amp; Contents through to the Amendment Register, built from six document types. The full index is the best way to see it all — expand any section to see what's inside.<button class="mini" onclick="toggleAssist(false);go('index')"><span><span class="badge b-intro">Index</span><div class="mt">See the whole manual</div></span><span class="open">Open ›</span></button></div>`);
+  body.scrollTop=body.scrollHeight;return;
+ }
+ const hit=INTENTS.find(it=>it.k.some(k=>ql.includes(k)));
+ const docs=hit?hit.d.map(id=>DOCS.find(d=>d.id===id)):[];
+ const reply=hit?hit.a:'I couldn\'t match that to a document in the prototype — try a task word like "roof", "incident" or "grinder". In the full build I\'ll understand anything you throw at me.';
+ body.insertAdjacentHTML('beforeend',`<div class="msg-a">${reply}${docs.map(d=>`<button class="mini" onclick="toggleAssist(false);go('doc:${d.id}')"><span>${badge(d.type)}<div class="mt">${d.title}</div></span><span class="open">Open ›</span></button>`).join('')}<div class="meta" style="margin-top:7px">I point to documents — the document is always the source of truth.</div></div>`);
+ body.scrollTop=body.scrollHeight;
+}
+/* ============ router ============ */
+function go(route){
+ const [kind,arg]=route.split(':');
+ if(kind!=='lib')hzFilter=null;
+ const hs=document.getElementById('hsearch');if(hs)hs.style.display=(kind==='home')?'none':'';
+ if(kind==='home')viewHome();
+ else if(kind==='index')viewLibrary();
+ else if(kind==='path')viewPath(arg);
+ else if(kind==='lib')viewLib(arg);
+ else if(kind==='doc')viewDoc(arg);
+ window.scrollTo({top:0,behavior:'auto'});
+ _last=route;
+ location.hash=route;
+}
+let _last='';
+window.addEventListener('hashchange',()=>{const h=location.hash.slice(1)||'home';if(h!==_last)route(h);});
+function route(h){_last=h;const [k,a]=h.split(':');const hs=document.getElementById('hsearch');if(hs)hs.style.display=(h==='home'||h==='')?'none':'';if(k==='home')viewHome();else if(k==='index')viewLibrary();else if(k==='path'&&PATHS[a])viewPath(a);else if(k==='lib'&&COLS[a])viewLib(a);else if(k==='doc')viewDoc(a);else viewHome();}
+function current(){return location.hash.slice(1)||'home';}
+route(current());
+</script>
+</body>
+</html>
