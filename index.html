@@ -99,6 +99,30 @@ footer{border-top:1px solid var(--line);margin-top:70px;padding:26px 0 40px;font
 .dir-item .num{font-family:var(--display);font-weight:700;font-size:12px;color:var(--faint);width:24px;flex-shrink:0}
 .dir-item .arrow{margin-left:auto;color:var(--faint);font-size:12px;white-space:nowrap}
 .most{margin-top:54px}
+/* ---------- doc shell + persistent sidebar ---------- */
+.docshell{display:flex;gap:30px;align-items:flex-start;margin-top:4px}
+.docmain{flex:1;min-width:0}
+.docmain .docpage{margin:0}
+.sidenav{width:236px;flex-shrink:0;position:sticky;top:78px;max-height:calc(100vh - 96px);overflow-y:auto;padding-right:4px}
+.sn-head{font-family:var(--display);font-weight:700;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);padding:0 0 8px}
+details.sn-sec{border-bottom:1px solid var(--line)}
+details.sn-sec summary{list-style:none;display:flex;align-items:center;gap:8px;padding:9px 2px;cursor:pointer}
+details.sn-sec summary::-webkit-details-marker{display:none}
+.sn-num{font-family:var(--display);font-weight:700;font-size:10.5px;color:var(--brand-deep);background:var(--brand-soft);border-radius:5px;padding:2px 5px;flex-shrink:0}
+.sn-name{font-size:12.5px;font-weight:500;line-height:1.3}
+.sn-chev{margin-left:auto;color:var(--faint);font-size:11px;transition:transform .15s}
+details.sn-sec[open]>summary .sn-chev{transform:rotate(180deg)}
+.sn-list{padding:2px 0 8px 10px;display:flex;flex-direction:column;gap:1px}
+.sn-item{display:flex;gap:8px;align-items:baseline;text-align:left;background:none;border:none;border-radius:7px;padding:6px 8px;font-size:12.3px;color:var(--slate);line-height:1.35;width:100%}
+.sn-item:hover{background:var(--mist);color:var(--ink)}
+.sn-item.on{background:var(--brand-soft);color:var(--brand-deep);font-weight:600}
+.sn-code{font-family:var(--display);font-size:10px;font-weight:600;color:var(--faint);flex-shrink:0;min-width:42px}
+.sn-item.on .sn-code{color:var(--brand)}
+.sn-all{display:flex;align-items:center;gap:7px;margin-top:12px;background:none;border:none;color:var(--brand-deep);font-size:12.5px;font-weight:600;padding:4px 2px}
+.sn-all:hover{color:var(--brand)}
+.xlink{color:var(--brand);font-weight:500;text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--brand) 30%,transparent)}
+.xlink:hover{border-bottom-color:var(--brand)}
+@media(max-width:880px){.sidenav{display:none}.docshell{gap:0}}
 /* ---------- library / index ---------- */
 .libhead{padding:8px 0 0}
 .legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(225px,1fr));gap:10px;margin:22px 0 8px}
@@ -765,7 +789,9 @@ function viewDoc(id){
   <p class="note">Full content for this document is migrated in Phase 1 ingestion — this page shows its summary and key requirements.</p>`;
  }
  const related=relatedDocs(d);
- app.innerHTML=`<div class="docpage">${crumbs([['Home','home'],[p.title,'path:'+c.path],[c.title,'lib:'+d.col],[d.code]])}
+ app.innerHTML=`<div class="docshell">
+ <aside class="sidenav" aria-label="Manual contents">${sideNav(d.id)}</aside>
+ <div class="docmain"><div class="docpage">${crumbs([['Home','home'],[p.title,'path:'+c.path],[c.title,'lib:'+d.col],[d.code]])}
  <div class="dochead"><div>
   <div class="row">${badge(d.type)}<span class="meta">${d.code} · ${d.mins} min read · v3.1</span></div>
   <h1 style="margin-top:10px">${d.title}</h1>
@@ -776,11 +802,28 @@ function viewDoc(id){
   <button class="btn" title="Download — generated from this page, branded for your company">${svg('dl')} Download</button>
   <button class="btn" aria-label="Print">${svg('print')}</button>
  </div></div>
- <div class="docbody">${body}</div>
+ <div class="docbody">${linkify(body,d.id)}</div>
  ${related.length?`<h2 style="margin-top:30px">Goes with this document</h2><div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin-top:12px">${related.map(docCard).join('')}</div>`:''}
  <div class="docfoot"><span class="meta">Reviewed Apr 2026 · Next review Apr 2027 · Downloads are uncontrolled copies</span>
  <span class="row">${prev?`<a class="pn" href="#" onclick="event.preventDefault();go('doc:${prev.id}')">‹ ${prev.code}</a>`:''}${next?`<a class="pn" href="#" onclick="event.preventDefault();go('doc:${next.id}')">${next.code} ›</a>`:''}</span></div>
- ${foot()}</div>`;
+ ${foot()}</div></div></div>`;
+}
+/* turn document codes mentioned in body text into links to those documents */
+const CODE2ID={};DOCS.forEach(d=>{CODE2ID[d.code]=d.id;});
+const LINKABLE=Object.keys(CODE2ID).filter(c=>/-/.test(c)).sort((a,b)=>b.length-a.length);
+const CODE_RE=new RegExp('\\b('+LINKABLE.map(c=>c.replace(/[-]/g,'\\-')).join('|')+')\\b','g');
+function linkify(html,selfId){
+ return html.replace(CODE_RE,(m)=>{const id=CODE2ID[m];if(!id||id===selfId)return m;return `<a class="xlink" href="#" onclick="event.preventDefault();go('doc:${id}')">${m}</a>`;});
+}
+/* persistent left navigation: the full section index, current page open + highlighted */
+function sideNav(currentId){
+ const cur=DOCS.find(x=>x.id===currentId);
+ return `<div class="sn-head">Manual contents</div>`+SECTIONS.filter(s=>!s.home&&s.comps.length).map(s=>{
+  const inHere=s.comps.includes(currentId);
+  return `<details class="sn-sec" ${inHere?'open':''}><summary><span class="sn-num">${s.num}</span><span class="sn-name">${s.name}</span><span class="sn-chev">▾</span></summary>
+   <div class="sn-list">${s.comps.map(id=>{const d=DOCS.find(x=>x.id===id);if(!d)return '';return `<button class="sn-item ${id===currentId?'on':''}" onclick="go('doc:${id}')"><span class="sn-code">${d.code}</span>${d.title}</button>`;}).join('')}</div>
+  </details>`;
+ }).join('')+`<button class="sn-all" onclick="go('index')">${svg('index','width:14px;height:14px;stroke:currentColor')} See the full index</button>`;
 }
 const REL={'swi-014':['f-02','swms-b','swi-003'],'swms-b':['swi-014','f-02','swi-055'],'f-01':['pro-04','f-03'],'f-02':['swi-014','swms-b'],'pro-04':['f-01','msp-07'],'pol-01':['rr-01','int-01'],'swi-055':['swms-b','pro-22'],'int-01':['pol-01','swi-014','f-01']};
 function relatedDocs(d){return (REL[d.id]||[]).map(id=>DOCS.find(x=>x.id===id)).filter(Boolean);}
